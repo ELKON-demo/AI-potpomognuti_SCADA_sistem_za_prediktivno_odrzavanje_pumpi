@@ -1,0 +1,35 @@
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# --- AI model i trening podaci (generisani lokalno, ne treba u repo) ---
+*.joblib
+*.csv
+pumpa_istorijski_podaci.csv
+
+# --- Arduino / PlatformIO build fajlovi ---
+build/
+.pio/
+*.hex
+*.bin
+
+# --- Node-RED (ako lokalno pokrećeš iz .node-red foldera) ---
+node_modules/
+.node-red/
+
+# --- OS / editor smeće ---
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# --- Osjetljivi podaci (VAŽNO) ---
+# Ako napraviš kopiju .ino fajla sa PRAVIM WiFi kredencijalima za svoju upotrebu,
+# imenuj je npr. esp32_scada_node_local.ino i ostavi je ovdje da se ne commituje:
+*_local.ino
+secrets.h
