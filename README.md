@@ -50,7 +50,7 @@ sudo apt install -y mosquitto mosquitto-clients
 sudo systemctl enable --now mosquitto
 ```
 
-Podesi broker da prihvata konekcije sa mreže (`/etc/mosquitto/conf.d/default.conf` ili ekvivalent):
+Podesiti broker da prihvata konekcije sa mreže (`/etc/mosquitto/conf.d/default.conf` ili ekvivalent):
 ```
 listener 1883 0.0.0.0
 allow_anonymous true
@@ -60,33 +60,31 @@ allow_anonymous true
 
 ### 2. ESP32 firmver
 
-Otvori `esp32_scada_node.ino` u Arduino IDE-u (board: ESP32 Dev Module), popuni `WIFI_SSID`, `WIFI_PASSWORD` i `MQTT_BROKER` (IP adresa računara sa brokerom), uploaduj.
+Otvoriti `esp32_scada_node.ino` u Arduino IDE-u (board: ESP32 Dev Module), popuni `WIFI_SSID`, `WIFI_PASSWORD` i `MQTT_BROKER` (IP adresa računara sa brokerom), uploaduj.
 
-Hardver: potenciometar (10kΩ) na GPIO34 (vibracija-proxy) i GPIO35 (struja-proxy), napajanje **3.3V** (ne 5V).
+Hardver: potenciometar (10kΩ) na GPIO34 (vibracija-proxy) i GPIO35 (struja-proxy), napajanje **3.3V** (nikako 5V).
 
 Biblioteke: `PubSubClient`, `ArduinoJson`.
 
-Alternativa bez hardvera — pokreni simulator:
-```bash
+Alternativa bez hardvera — pokrenuti simulator:
+
 pip install paho-mqtt --break-system-packages
 python3 mqtt_sensor_simulator.py --mode live
-```
+
 
 ### 3. Node-RED SCADA dashboard
 
-```bash
 npm install -g --unsafe-perm node-red
 cd ~/.node-red && npm install node-red-dashboard
 node-red
-```
 
-Otvori `http://localhost:1880`, uvezi `node_red_scada_flow.json` (Menu → Import), zatim `node_red_ai_alarm_nodes.json` (import u isti flow), **Deploy**.
+
+Otvoriti `http://localhost:1880`, uvezi `node_red_scada_flow.json` (Menu → Import), zatim `node_red_ai_alarm_nodes.json` (import u isti flow), **Deploy**.
 
 Dashboard: `http://localhost:1880/ui`
 
 ### 4. Trening AI modela
 
-```bash
 pip install pandas scikit-learn joblib --break-system-packages
 
 # generiši istorijsku bazu (bulk režim)
@@ -94,13 +92,11 @@ python3 mqtt_sensor_simulator.py --mode bulk --samples 5000 --output pumpa_istor
 
 # treniraj model (contamination = % anomalija iz ispisa prethodne komande)
 python3 train_ai_model.py --input pumpa_istorijski_podaci.csv --contamination 0.018
-```
+
 
 ### 5. Live AI detekcija
 
-```bash
 python3 live_ai_detection.py
-```
 
 Sluša `elkon/pumpa1/senzori`, šalje AI alarm na `elkon/pumpa1/ai_alarm` kad detektuje anomaliju.
 
