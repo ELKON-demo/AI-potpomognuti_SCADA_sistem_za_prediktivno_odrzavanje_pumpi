@@ -1,0 +1,78 @@
+[
+  {
+    "id": "ai1",
+    "type": "mqtt in",
+    "z": "t1",
+    "name": "AI alarm (MQTT ulaz)",
+    "topic": "elkon/pumpa1/ai_alarm",
+    "qos": "0",
+    "datatype": "json",
+    "broker": "b1",
+    "x": 170,
+    "y": 460,
+    "wires": [["ai2"]]
+  },
+  {
+    "id": "ai2",
+    "type": "function",
+    "z": "t1",
+    "name": "Formatiraj AI status",
+    "func": "// Poruka od live_ai_detection.py ima polje ai_anomaly: true/false\nconst p = msg.payload;\n\nlet tekst;\nif (p.ai_anomaly === true) {\n    tekst = 'AI RANO UPOZORENJE - Anomalija (score: ' + p.anomaly_score + ')';\n} else {\n    tekst = 'AI: Normalan obrazac rada';\n}\n\nmsg.payload = tekst;\nmsg.ai_anomaly = p.ai_anomaly;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 410,
+    "y": 460,
+    "wires": [["ai3", "ai4"]]
+  },
+  {
+    "id": "ai3",
+    "type": "ui_text",
+    "z": "t1",
+    "group": "ug1",
+    "order": 6,
+    "width": 0,
+    "height": 0,
+    "name": "AI status (tekst)",
+    "label": "AI rano upozorenje",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "x": 650,
+    "y": 440,
+    "wires": []
+  },
+  {
+    "id": "ai4",
+    "type": "switch",
+    "z": "t1",
+    "name": "Samo pri aktivnoj anomaliji",
+    "property": "ai_anomaly",
+    "propertyType": "msg",
+    "rules": [
+      { "t": "true" }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 1,
+    "x": 650,
+    "y": 500,
+    "wires": [["ai5"]]
+  },
+  {
+    "id": "ai5",
+    "type": "ui_toast",
+    "z": "t1",
+    "position": "bottom right",
+    "displayTime": "6",
+    "highlight": "",
+    "sendall": true,
+    "outputs": 0,
+    "ok": "OK",
+    "cancel": "",
+    "raw": false,
+    "topic": "AI rano upozorenje",
+    "name": "AI alarm notifikacija",
+    "x": 900,
+    "y": 500,
+    "wires": []
+  }
+]
