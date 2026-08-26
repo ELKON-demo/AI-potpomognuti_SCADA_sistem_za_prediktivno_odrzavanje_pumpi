@@ -47,7 +47,7 @@ int readVibrationRaw() {
 
 int readCurrentRaw() {
   return analogRead(PIN_CURRENT_PROXY);
-  // Real sensor (ACS712): isti analogni pristup, samo drugi mapping (mV/A)
+  // Real senzor (ACS712): isti analogni pristup, samo drugi mapping (mV/A)
 }
 
 float mapValue(int rawAdc, float outMin, float outMax) {
