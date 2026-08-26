@@ -1,14 +1,14 @@
 """
-Live AI detekcija anomalija (ELKON demo)
+Live AI detekcija anomalija (demo za ELKON)
 
-Sluša MQTT senzorske podatke, ocjenjuje ih istreniranim Isolation Forest
-modelom, i pri promjeni stanja (normalno <-> anomalija) šalje alarm na
+Sluša MQTT podatke sa senzora, ocjenjuje ih istreniranim Isolation Forest
+modelom a pri promjeni stanja (normalno <-> anomalija) šalje alarm na
 poseban topik (elkon/pumpa1/ai_alarm) - odvojeno od klasičnog SCADA
-prag-alarma u Node-RED-u, da se na dashboardu vidi razlika između
+prag-alarma u Node-RED-u, da bi se na dashboardu vidjela razlika između
 klasičnog i AI pristupa.
 
 Zavisnosti: paho-mqtt, joblib, scikit-learn
-Potrebni fajlovi: isolation_forest_model.joblib, feature_scaler.joblib
+neophodni fajlovi: isolation_forest_model.joblib, feature_scaler.joblib
 """
 
 import argparse
