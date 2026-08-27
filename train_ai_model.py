@@ -1,5 +1,5 @@
 """
-Treniranje AI modela za detekciju anomalija na pumpi (ELKON demo)
+Treniranje AI modela za detekciju anomalija na pumpi (demonstracija za ELKON)
 
 Isolation Forest - uci normalan obrazac rada (vibracija + struja) iz
 istorijskih podataka, bez potrebe za labelovanim primjerima kvara.
