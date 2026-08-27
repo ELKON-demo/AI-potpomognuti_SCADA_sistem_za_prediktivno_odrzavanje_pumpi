@@ -1,33 +1,33 @@
 """
 ============================================================================
-MQTT SIMULATOR SENZORA PUMPE (ELKON demo projekat)
+MQTT SIMULATOR SENZORA PUMPE (demo projekat za ELKON)
 ============================================================================
 
 SVRHA:
-Ovaj program NE ZAVISI od ESP32 hardvera. On generiše realistične
+Ovaj program NE ZAVISI od ESP32 hardvera. On generiše prilično realistične
 sintetičke podatke koji liče na signal sa vibracionog i strujnog senzora
-pumpe, i šalje ih na ISTI MQTT topik i u ISTOM JSON formatu kao ESP32
+pumpe pa ih šalje ih na ISTI MQTT topik i u ISTOM JSON formatu kao ESP32
 firmver (esp32_scada_node.ino). Zahvaljujući tome, Node-RED dashboard i
 Python AI skripta za detekciju anomalija ne prave nikakvu razliku između
-"pravih" podataka sa ESP32-a i ovih simuliranih - potpuno su zamjenjivi.
+pravih podataka sa ESP32-a i ovih simuliranih - potpuno su zamjenjivi.
 
-ZAŠTO NAM TREBA:
+ZAŠTO OVAJ SIMULATOR TREBA:
 1) TRENIRANJE AI MODELA zahtijeva stotine/hiljade uzoraka "normalnog" rada
-   pumpe. Ručno okretanje potenciometra na ESP32-u satima je nerealno -
+   pumpe. Ručno okretanje potenciometra na ESP32-u satima nije realno -
    zato ovaj simulator može da generiše veliku istorijsku bazu podataka
    za nekoliko sekundi (--mode bulk).
-2) TESTIRANJE DASHBOARDA čak i kad ESP32 nije priključen ili nije pri
+2) OMOGUĆAVA TESTIRANJE DASHBOARDA čak i kad ESP32 nije priključen ili nije pri
    ruci (--mode live).
 
-DVA REŽIMA RADA:
+IMA DVA REŽIMA RADA:
   --mode live   -> šalje po jedan uzorak u sekundi (kao pravi ESP32),
                    koristan za live demo dashboarda bez hardvera
-  --mode bulk   -> generiše N uzoraka odmah (bez čekanja) i upisuje ih
+  --mode bulk   -> generiše N uzoraka automatski i upisuje ih
                    u CSV fajl - koristan za treniranje AI modela
 
 MODEL PONAŠANJA PUMPE:
 - Normalan rad: vibracija i struja osciluju oko baznih vrijednosti sa
-  malim šumom (kao stvarna mehanička vibracija i mreža).
+  malim šumom (kao stvarna mehanička vibracija i električna mreža).
 - Povremeno (konfigurabilna vjerovatnoća) simulator ulazi u "kvar" -
   postepeni porast vibracije (habanje ležaja) i/ili strujni udar
   (preopterećenje) - baš ono što AI model treba da nauči da prepozna.
@@ -96,14 +96,14 @@ class PumpSimulator:
             print(f"[SIMULATOR] >>> Pocinje simulirani KVAR "
                   f"(trajanje ~{self.fault_samples_remaining} uzoraka)")
 
-        # --- Bazne (zdrave) vrijednosti + slučajni šum ---
+        # --- Bazne (baseline) vrijednosti + slučajni šum ---
         vibration = random.gauss(VIBRATION_BASELINE_MMS, VIBRATION_NOISE_STD)
         current = random.gauss(CURRENT_BASELINE_A, CURRENT_NOISE_STD)
 
         # blaga periodična komponenta (imitira rotaciju osovine/harmoniku)
         vibration += 0.4 * math.sin(self.sample_count / 15.0)
 
-        # --- Ako smo u kvaru, dodajemo postepeno rastući "fault signal" ---
+        # --- Ako je kvar, dodajemo postepeno rastući "fault signal" ---
         if self.in_fault:
             self.fault_progress += 1
             # trougaoni profil: raste pa opada, realističnije od naglog skoka
@@ -119,7 +119,7 @@ class PumpSimulator:
                 self.in_fault = False
                 print("[SIMULATOR] <<< Kvar zavrsen, pumpa se vraca u normalan rad")
 
-        # vrijednosti ne mogu biti negativne (fizički nemoguće)
+        # vrijednosti ne mogu biti negativne (fizički je nemoguće)
         vibration = max(vibration, 0.0)
         current = max(current, 0.0)
 
@@ -128,7 +128,7 @@ class PumpSimulator:
             "ts_ms": int(time.time() * 1000),
             "vibration_mms": round(vibration, 2),
             "current_a": round(current, 2),
-            "is_simulated_fault": self.in_fault,  # KORISNO za treniranje AI (label),
+            "is_simulated_fault": self.in_fault,  # KORISNO je za treniranje AI (label),
                                                      # ali NE šaljemo ovo polje na MQTT
                                                      # (pravi senzor to ne bi znao) -
                                                      # koristi se samo za CSV/trening
@@ -180,7 +180,7 @@ def run_live_mode(interval_s: float):
 
 def run_bulk_mode(num_samples: int, output_csv: str):
     """
-    Generise veliku kolicinu istorijskih podataka ODMAH (bez cekanja) i
+    Generise veliku kolicinu istorijskih podataka i
     upisuje ih u CSV fajl - koristi se za treniranje AI modela za
     detekciju anomalija (Isolation Forest i sl.), jer je ucenju potrebno
     nekoliko stotina/hiljada uzoraka normalnog (i po koji anomalni) rada.
@@ -208,8 +208,8 @@ def run_bulk_mode(num_samples: int, output_csv: str):
     print(f"[BULK] Zavrseno. Upisano {len(rows)} redova u '{output_csv}'.")
     print(f"[BULK] Od toga {fault_count} uzoraka je bilo tokom simuliranog kvara "
           f"({100 * fault_count / len(rows):.1f}%).")
-    print("[BULK] Ovaj CSV mozes direktno koristiti za treniranje AI modela "
-          "(kolona 'is_simulated_fault' ti sluzi za provjeru tacnosti modela, "
+    print("[BULK] Ovaj CSV se moze direktno koristiti za treniranje AI modela "
+          "(kolona 'is_simulated_fault' sluzi za provjeru tacnosti modela, "
           "iako sam model ucenja NE treba da vidi tu kolonu tokom treniranja).")
 
 
